@@ -1,95 +1,81 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+// page.js
+'use client';
+import React, { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import AddTransaction from './Componenets/AddTransaction';
+import TransactionList from './Componenets/TransactionList';
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+const ExpenseTracker = () => {
+	const [expenses, setExpenses] = useState([]);
+	const [description, setDescription] = useState('');
+	const [amount, setAmount] = useState('');
+	const [type, setType] = useState('expense'); // Default to expense
+	const [balance, setBalance] = useState(0);
+	const [totalIncome, setTotalIncome] = useState(0);
+	const [totalExpense, setTotalExpense] = useState(0);
+	const [date, setDate] = useState(new Date().toLocaleDateString());
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+	const addExpense = () => {
+		if (!description.trim() || !amount.trim()) return;
+		const newExpense = { id: expenses.length + 1,
+			description, amount: parseFloat(amount), type, date };
+		setExpenses([...expenses, newExpense]);
+		setBalance(type === 'expense' ? 
+		balance - parseFloat(amount) : balance + parseFloat(amount));
+		if (type === 'expense') {
+			setTotalExpense(totalExpense + parseFloat(amount));
+		} else {
+			setTotalIncome(totalIncome + parseFloat(amount));
+		}
+		setDescription('');
+		setAmount('');
+		setDate(new Date().toLocaleDateString());
+	};
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+	const removeExpense = (id) => {
+		const expenseToRemove = expenses.find(expense => expense.id === id);
+		if (expenseToRemove) {
+			setExpenses(expenses.filter(expense => expense.id !== id));
+			setBalance(expenseToRemove.type === 'expense' ?
+			balance + expenseToRemove.amount : 
+											balance - expenseToRemove.amount);
+			if (expenseToRemove.type === 'expense') {
+				setTotalExpense(totalExpense - expenseToRemove.amount);
+			} else {
+				setTotalIncome(totalIncome - expenseToRemove.amount);
+			}
+		}
+	};
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
+	return (
+		<div className="container bg-light mt-5 p-5 
+						border border-dark col-md-8">
+			<h1 className="text-center text-success">Track Your Expenses with Ease</h1>
+			<h4 className="mt-2 text-center">Expense Tracker</h4>
+			<AddTransaction 
+			description={description}
+			setDescription={setDescription}
+			amount={amount}
+			setAmount={setAmount}
+			date={date}
+			setDate={setDate}
+			type={type}
+			setType={setType}
+			balance={balance}
+			setBalance={setBalance}
+			totalIncome={totalIncome}
+			setTotalIncome={setTotalIncome}
+			totalExpense={totalExpense}
+			setTotalExpense={setTotalExpense}
+			addExpense={addExpense}
+			/>
+			<TransactionList 
+			expenses={expenses}
+			removeExpense={removeExpense}
+			/>
+		</div>
+	);
+};
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
-}
+export default ExpenseTracker;
